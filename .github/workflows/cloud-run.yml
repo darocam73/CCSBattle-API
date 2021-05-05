@@ -44,7 +44,7 @@ jobs:
       uses: google-github-actions/deploy-cloudrun@v0.2.0
       with:
         service: ${{ secrets.SERVICE_NAME }}
-        image: "gcr.io/$PROJECT_ID/$SERVICE_NAME"
+        image: "gcr.io/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE_NAME }}"
         region: ${{ secrets.RUN_REGION }}
         credentials: ${{ secrets.RUN_SA_KEY }}
         env_vars: >
@@ -54,5 +54,5 @@ jobs:
           MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }},
           PORT=${{ secrets.PORT }},
           SOCKET_PORT=${{ secrets.SOCKET_PORT }},
-          SECRET=${{ secrets.SECRE }}T
+          SECRET=${{ secrets.SECRET }}
 
