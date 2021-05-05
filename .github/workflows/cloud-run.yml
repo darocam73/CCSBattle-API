@@ -48,6 +48,7 @@ jobs:
           --region "$RUN_REGION" \
           --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
           --project "$PROJECT_ID" \
+          --allow-unauthenticated \
           --set-env-vars "MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,APP_PORT=$APP_PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET"
 
 
