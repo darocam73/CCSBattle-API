@@ -46,5 +46,13 @@ jobs:
         service: ${{ secrets.SERVICE_NAME }}
         image: gcr.io/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE_NAME }}
         region: ${{ secrets.RUN_REGION }}
-        credentials: ${{ secrets.GCP_SA_KEY }}
-        env_vars: "MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }}"
+        credentials: ${{ secrets.RUN_SA_KEY }}
+        env_vars: >
+          MYSQL_HOST=$MYSQL_HOST,
+          MYSQL_USER=$MYSQL_USER,
+          MYSQL_PASS=$MYSQL_PASS,
+          MYSQL_DATABASE=$MYSQL_DATABASE,
+          PORT=$PORT,
+          SOCKET_PORT=$SOCKET_PORT,
+          SECRET=$SECRET
+
