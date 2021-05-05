@@ -37,14 +37,14 @@ jobs:
       run: |-
         gcloud builds submit \
           --quiet \
-          --tag "gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:$GITHUB_SHA"
+          --tag "gcr.io/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE_NAME }}:$GITHUB_SHA"
 
     # Deploy image to Cloud Run
     - name: Deploy to Cloud Run
       uses: google-github-actions/deploy-cloudrun@v0.2.0
       with:
-        service: ${{ env.SERVICE_NAME }}
-        image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}
-        region: ${{ env.RUN_REGION }}
-        credentials: ${{ env.GCP_SA_KEY }}
-        env_vars: "MYSQL_HOST=${{ env.MYSQL_HOST }},MYSQL_USER=${{ env.MYSQL_USER }}"
+        service: ${{ secrets.SERVICE_NAME }}
+        image: gcr.io/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE_NAME }}
+        region: ${{ secrets.RUN_REGION }}
+        credentials: ${{ secrets.GCP_SA_KEY }}
+        env_vars: "MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }}"
