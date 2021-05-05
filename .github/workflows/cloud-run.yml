@@ -43,6 +43,6 @@ jobs:
     # Deploy to google run
     - name: Deploy
       run: |-
-        gcloud run deploy ${{ secrets.SERVICE_NAME }} \
+        gcloud run deploy "$SERVICE_NAME" \
           --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
-          --update-env-vars MYSQL_HOST=${{ secrets.MYSQL_HOST }},MYSQL_USER=${{ secrets.MYSQL_USER }},MYSQL_PASS=${{ secrets.MYSQL_PASS }},MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }},PORT=${{ secrets.PORT }},SOCKET_PORT=${{ secrets.SOCKET_PORT }},SECRET=${{ secrets.SECRET }}
+          --set-env-vars "MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET"
