@@ -44,8 +44,10 @@ jobs:
     - name: Deploy
       run: |-
         gcloud run deploy "$SERVICE_NAME" \
-          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
-          --set-env-vars "MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET"
-          --project "$PROJECT_ID" \
+          --platform managed \
           --region "$RUN_REGION" \
-          --platform managed
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --project "$PROJECT_ID" \
+          --set-env-vars "MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET"
+
+
