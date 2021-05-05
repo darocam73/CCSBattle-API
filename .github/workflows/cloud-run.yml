@@ -47,4 +47,4 @@ jobs:
         image: gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}
         region: ${{ env.RUN_REGION }}
         credentials: ${{ env.GCP_SA_KEY }}
-        env_vars: "MYSQL_HOST=${{ env.MYSQL_HOST }},MYSQL_USER=${{ envMYSQL_USER }}"
+        env_vars: "MYSQL_HOST=${{ env.MYSQL_HOST }},MYSQL_USER=${{ env.MYSQL_USER }}"
