@@ -31,6 +31,7 @@ jobs:
       with:
         project_id: ${{ secrets.RUN_PROJECT }}
         service_account_key: ${{ secrets.RUN_SA_KEY }}
+        export_default_credentials: true
 
     # Build and push image to Google Container Registry
     - name: Build
@@ -39,20 +40,15 @@ jobs:
           --quiet \
           --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
 
-    # Deploy image to Cloud Run
-    - name: Deploy to Cloud Run
-      uses: google-github-actions/deploy-cloudrun@v0.2.0
-      with:
-        service: ${{ secrets.SERVICE_NAME }}
-        image: "gcr.io/${{ secrets.PROJECT_ID }}/${{ secrets.SERVICE_NAME }}"
-        region: ${{ secrets.RUN_REGION }}
-        credentials: ${{ secrets.RUN_SA_KEY }}
-        env_vars: >
-          MYSQL_HOST=${{ secrets.MYSQL_HOST }},
-          MYSQL_USER=${{ secrets.MYSQL_USER }},
-          MYSQL_PASS=${{ secrets.MYSQL_PASS }},
-          MYSQL_DATABASE=${{ secrets.MYSQL_DATABASE }},
-          PORT=${{ secrets.PORT }},
-          SOCKET_PORT=${{ secrets.SOCKET_PORT }},
-          SECRET=${{ secrets.SECRET }}
+        gcloud run deploy $SERVICE_NAME \
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
+          --update-env-vars MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET
 
+
+
+    # Build and push image to Google Container Registry
+    - name: Deploy
+      run: |-
+        gcloud run deploy $SERVICE_NAME \
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --update-env-vars MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET
