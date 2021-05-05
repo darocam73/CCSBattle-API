@@ -40,12 +40,6 @@ jobs:
           --quiet \
           --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
 
-        gcloud run deploy $SERVICE_NAME \
-          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
-          --update-env-vars MYSQL_HOST=$MYSQL_HOST,MYSQL_USER=$MYSQL_USER,MYSQL_PASS=$MYSQL_PASS,MYSQL_DATABASE=$MYSQL_DATABASE,PORT=$PORT,SOCKET_PORT=$SOCKET_PORT,SECRET=$SECRET
-
-
-
     # Build and push image to Google Container Registry
     - name: Deploy
       run: |-
