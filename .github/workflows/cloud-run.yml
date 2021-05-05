@@ -1,0 +1,54 @@
+name: Build and Deploy to Cloud Run
+
+on:
+  push:
+    branches:
+    - master
+
+env:
+  PROJECT_ID: ${{ secrets.RUN_PROJECT }}
+  RUN_REGION: us-central1
+  SERVICE_NAME: cssbattle-api
+  MYSQL_HOST: ${{ secrets.MYSQL_HOST }}
+  MYSQL_USER: ${{ secrets.MYSQL_USER }}
+  MYSQL_PASS: ${{ secrets.MYSQL_PASS }}
+  MYSQL_DATABASE: ${{ secrets.MYSQL_DATABASE }}
+  PORT: ${{ secrets.PORT }}
+  SOCKET_PORT: ${{ secrets.SOCKET_PORT }}
+  SECRET: ${{ secrets.SECRET }}
+
+jobs:
+  setup-build-deploy:
+    name: Setup, Build, and Deploy to Cloud Run
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+
+    # Setup gcloud CLI
+    - uses: GoogleCloudPlatform/github-actions/setup-gcloud@master
+      with:
+        version: '290.0.1'
+        service_account_key: ${{ secrets.RUN_SA_KEY }}
+        project_id: ${{ secrets.RUN_PROJECT }}
+        env_vars: PROJECT_ID: ${{ secrets.RUN_PROJECT }} \
+          RUN_REGION: us-central1
+          SERVICE_NAME: cssbattle-api
+
+    # Build and push image to Google Container Registry
+    - name: Build
+      run: |-
+        gcloud builds submit \
+          --quiet \
+          --tag "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA"
+
+    # Deploy image to Cloud Run
+    - name: Deploy
+      run: |-
+        gcloud run deploy "$SERVICE_NAME" \
+          --quiet \
+          --region "$RUN_REGION" \
+          --image "gcr.io/$PROJECT_ID/$SERVICE_NAME:$GITHUB_SHA" \
+          --platform "managed" \
+          --allow-unauthenticated
