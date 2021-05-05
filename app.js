@@ -18,7 +18,7 @@ const scoreRouter = require('./routes/score');
 const app = express();
 const server = require('http').Server(app);
 const io = require('socket.io')(server, { cors: { origin: '*' }});
-server.listen(8080);
+server.listen(process.env.SOCKET_PORT);
 
 /* --- socket.io --- */
 io.on('connection', socket => {
