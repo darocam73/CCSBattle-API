@@ -15,7 +15,6 @@ const getPlayer = async (req, res) => {
       return res.status(500).send({ error: err });
     }
     if(results) {
-      console.log('results', results);
       return res.status(200).send({ data: { player: results[0] } });
     }
     return res.status(500).send();

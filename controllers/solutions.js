@@ -1,7 +1,6 @@
 const { connection, asyncConnection, query } = require('../db');
-const nodeHtmlToImage = require('node-html-to-image');
 const { getLevelImage } = require('./level');
-const { getImageMatching, generateHTML, getTokenData } = require('../utils');
+const { getImageMatching, generateHTML, getTokenData, getImageFromHtml } = require('../utils');
 const { TABLES } = require('../utils/constants');
 
 const add = async (req, res) => {
@@ -50,15 +49,28 @@ const add = async (req, res) => {
   db.end();
 };
 
+const downloadImage = async (req, res) => {
+  const { body } = req;
+  const { id: userId } = getTokenData(req);
+  
+  if (
+    !userId
+    || typeof body?.html === 'undefined'
+    || typeof body?.css === 'undefined'
+  ) return res.status(400).send({ error: 'Empty data' });
+
+  const solutionImage = await getImageFromHtml(body.html, body.css);
+  res.writeHead(200, { 'Content-Type': 'image/png' });
+  res.end(solutionImage, 'binary');
+};
+
 const compareImages = async (req, res) => {
   const { body } = req;
   if (!body?.challengeId || typeof body?.css === 'undefined' || typeof body?.html === 'undefined')
     return res.status(400).send({ error: 'Empty data on compare image' });
 
   const originalUrl = await getLevelImage(body.challengeId);
-  const solutionImage = await nodeHtmlToImage({
-    html: generateHTML(body.html, body.css),
-  });
+  const solutionImage = await getImageFromHtml(body.html, body.css);
   const matchingPercent = await getImageMatching(
     solutionImage,
     `public/images/${originalUrl}`,
@@ -107,4 +119,5 @@ module.exports = {
   add,
   compareImages,
   getSolutionsByBattleId,
+  downloadImage,
 };

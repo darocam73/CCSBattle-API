@@ -1,5 +1,6 @@
 const express = require('express');
 const {
+  add,
   getAll,
   getById,
 } = require('../controllers/level');
@@ -13,6 +14,11 @@ router.get('/', async (req, res) => {
 /* GET level by id. */
 router.get('/:id', async (req, res) => {
   getById(req, res);
+});
+
+/* Add new level */
+router.post('/create', async (req, res) => {
+  add(req, res);
 });
 
 module.exports = router;

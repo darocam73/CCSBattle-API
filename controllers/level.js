@@ -1,6 +1,61 @@
+const fs = require('fs');
+const fsPromises = fs.promises;
 const { connection, asyncConnection, query } = require('../db');
 const { TABLES } = require('../utils/constants');
-const { getTokenData } = require('../utils');
+const { getTokenData, getImageFromHtml } = require('../utils');
+
+const add = async (req, res) => {
+  const { body } = req;
+  const { id: userId } = getTokenData(req);
+  if (!userId) return res.status(400).send({ error: 'Token is missing...' });
+
+  if (!body?.html || !body?.css) return res.status(400).send({ error: 'Missing fields' });
+
+  const solutionImage = await getImageFromHtml(body.html, body.css);
+
+  const dateString = Date.now().toString(36);
+  const randomness = Math.random().toString(36).substr(2);
+  const filename = `${dateString + randomness}.png`;
+
+  try {
+    fsPromises.writeFile(`public/images/${filename}`, solutionImage);
+  } catch (error) {
+    console.log('Error saving image file', error);
+    return res.status(500).send({ status: 'Error saving image file', error });
+  }
+
+  const htmlLength = unescape(body?.html).replace(/ /g, '').replace(/(?:\r\n|\r|\n)/g, '').length;
+  const cssLength = unescape(body?.css).replace(/ /g, '').replace(/(?:\r\n|\r|\n)/g, '').length;
+
+  const getCodeLength = (code = '') => (
+    unescape(code).replace(/ /g, '').replace(/(?:\r\n|\r|\n)/g, '').length
+  );
+
+  const q = `
+    INSERT INTO ${TABLES.CHALLENGES_TABLE} (html, css, image, htmlLength, cssLength, colors)
+    VALUES (
+      "${body?.baseHtml || ''}",
+      "${body?.baseCss || ''}",
+      "${filename}",
+      ${htmlLength},
+      ${cssLength},
+      "${body?.colors || []}"
+    );
+  `;
+
+  try {
+    const con = await asyncConnection();
+    const [rows] = await con.execute(q);
+    if (!rows?.insertId)
+      throw new Error('No insertId value');
+    con.end();
+    return res.status(200).send({ data: { id: rows.insertId} });
+  } catch (error) {
+    console.log('error', error);
+    con.end();
+    return res.status(500).send({ status: 'Error saving lavel', error });
+  }
+}
 
 const getAll = async (req, res) => {
   const { id: userId } = getTokenData(req);
@@ -78,5 +133,5 @@ const getLevelImage = async (id) => {
 }
 
 module.exports = {
-  getAll, getById, getLevelImage,
+  add, getAll, getById, getLevelImage,
 };

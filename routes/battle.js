@@ -6,6 +6,7 @@ const {
   getByBattleId,
   startBattle,
   getBattleStatus,
+  addLevels,
 } = require('../controllers/battle');
 const router = express.Router();
 
@@ -18,7 +19,6 @@ router.get('/', async (req, res) => {
 router.get('/:id/status', async (req, res) => {
   const { params: { id }} = req;
   const status = await getBattleStatus(id);
-  console.log('status', status)
   if (!status) {
     return res.status(500).send({ error: 'Internal error' });
   }
@@ -49,6 +49,10 @@ router.post('/', (req, res) => {
 /* Start battle */
 router.patch('/:id/start', (req, res) => {
   startBattle(req, res);
+});
+
+router.post('/:id/addLevels', (req, res) => {
+  addLevels(req, res);
 });
 
 module.exports = router;

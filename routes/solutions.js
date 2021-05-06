@@ -2,6 +2,7 @@ const express = require('express');
 const {
   add,
   compareImages,
+  downloadImage,
 } = require('../controllers/solutions');
 const {
   getBattleStatus,
@@ -30,6 +31,11 @@ router.post('/', async (req, res) => {
 router.post('/compare', async (req, res) => {
   const { matchingPercent } = await compareImages(req, res);
   return res.status(200).send({ data: { result: matchingPercent } });
+});
+
+/* Download image */
+router.post('/download', async (req, res) => {
+  downloadImage(req, res);
 });
 
 module.exports = router;

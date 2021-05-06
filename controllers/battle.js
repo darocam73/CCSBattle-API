@@ -70,6 +70,42 @@ const add = async (req, res) => {
   db.end();
 };
 
+const addLevels = async (req, res) => {
+  const { body } = req;
+  const { params: { id: battleId } } = req;
+  const { id: userId, userName } = getTokenData(req);
+  if (!userId) return res.status(400).send({ error: 'Token is missing...' });
+  if (!body?.levels) return res.status(400).send({ error: 'Missing levels' });
+
+  try {
+    const q = `
+      SELECT id
+      FROM ${TABLES.BATTLE_TABLE}
+      WHERE id=${battleId} AND created_by=${userId};
+    `;
+    const con = await asyncConnection();
+    const [rows] = await con.execute(q);
+    if (!rows?.length)
+      res.status(400).send({ error: 'Your are not the owner of this battle...' });
+    
+    qInsert = `
+      INSERT INTO ${TABLES.BATTLE_CHALLENGES_TABLE_RELATION} (battleId, challengeId)
+      VALUES ${body.levels.map((levelId) => `(${battleId}, ${levelId})`).join(',')};
+    `;
+
+    const [insertedRows] = await con.execute(qInsert);
+    if (insertedRows?.affectedRows || insertedRows?.affectedRows === 0)
+      res.status(400).send({ error: 'No records saved' });
+
+    if (insertedRows?.affectedRows < levels.length)
+      return res.status(400).send({ error: 'Not all records has been saved' });
+
+    return res.status(200).send({ data: { status: 'ok' } });
+  } catch (error) {
+    return res.status(500).send({ error });
+  }
+}
+
 const getByBattleId = (req, res) => {
   const { params } = req;
   const { id: userId, userName } = getTokenData(req);
@@ -88,8 +124,6 @@ const getByBattleId = (req, res) => {
     )
     ORDER BY level_order ASC;
   `;
-
-  console.log('q ', q )
 
   const db = connection();
 
@@ -167,7 +201,7 @@ const startBattle = async (req, res) => {
   // Start counter and emit to all connected clients
   let counter = 5;
   const counterInterval = setInterval(() => {
-    console.log(`Countdown: ${counter}`);
+    // console.log(`Countdown: ${counter}`);
     if (counter === 0) {
       clearInterval(counterInterval);
       initBattle(battleId, duration, startedAt, req.io);
@@ -181,7 +215,7 @@ const startBattle = async (req, res) => {
 
 // Initiate Battle
 const initBattle = async (battleId, duration, startedAt, io) => {
-  console.log(`Iniciar batalla ${battleId}`);
+  console.log(`Start battle ${battleId}`);
   const roomName = `${ROOMS.BATTLE}${battleId}`;
 
   // Update DB started_at value if battle has not started yet
@@ -207,12 +241,12 @@ const initBattle = async (battleId, duration, startedAt, io) => {
   // Battle timer
   const battleTimer = setInterval(() => {
     const remainingTime = endDate - new Date().getTime();
-    console.log(`Remaining time: ${remainingTime} miliseconds`);
+    // console.log(`Remaining time: ${remainingTime} miliseconds`);
     if (remainingTime < 0) {
       clearInterval(battleTimer);
       finishBattle(battleId);
       io.sockets.emit('battle-finished');
-      console.log('fin de la batalla');
+      console.log('Battle finished');
     } else {
       io.to(roomName).emit('battle-timer', remainingTime);
     }
@@ -235,5 +269,5 @@ const finishBattle = async (battleId) => {
 }
 
 module.exports = {
-  getAll, getById, add, getByBattleId, startBattle, getBattleStatus,
+  getAll, getById, add, getByBattleId, startBattle, getBattleStatus, addLevels,
 };
