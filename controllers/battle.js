@@ -193,7 +193,7 @@ const startBattle = async (req, res) => {
     const endDate = new Date(startedAt).getTime() + duration * 60 * 1000;
     const remainingTime = endDate - new Date().getTime();
     if (remainingTime <= 0) {
-      req.io.to(roomName).emit('battle-finished');
+      req.io.sockets.to(roomName).emit('battle-finished');
       return res.status(200).send({ data: { status: 'ok' } });
     }
   }
@@ -206,7 +206,7 @@ const startBattle = async (req, res) => {
       clearInterval(counterInterval);
       initBattle(battleId, duration, startedAt, req.io);
     } else {
-      req.io.to(roomName).emit('battle-countdown', counter--);
+      req.io.sockets.to(roomName).emit('battle-countdown', counter--);
     }
   }, 1000);
 
@@ -245,10 +245,10 @@ const initBattle = async (battleId, duration, startedAt, io) => {
     if (remainingTime < 0) {
       clearInterval(battleTimer);
       finishBattle(battleId);
-      io.sockets.emit('battle-finished');
+      io.sockets.to(roomName).emit('battle-finished');
       console.log('Battle finished');
     } else {
-      io.to(roomName).emit('battle-timer', remainingTime);
+      io.sockets.to(roomName).emit('battle-timer', remainingTime);
     }
   }, 1000);
 }

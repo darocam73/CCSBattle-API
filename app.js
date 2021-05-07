@@ -28,8 +28,14 @@ io.on('connection', socket => {
   socket.on('join-room', battleId => {
     const roomName = `${ROOMS.BATTLE}${battleId}`;
     socket.join(roomName);
-    io.to(roomName).emit('join-room-client', `conectado a room ${roomName}`)
-  })
+    io.to(roomName).emit('join-room-client', `Connected to ${roomName} room`);
+  });
+
+  socket.on('disconnect-battle', battleId => {
+    const roomName = `${ROOMS.BATTLE}${battleId}`;
+    socket.leave(roomName);
+    socket.emit('leave-room-client', `Room ${roomName} left`);
+  });
 });
 
 app.use((req, res, next) => {
