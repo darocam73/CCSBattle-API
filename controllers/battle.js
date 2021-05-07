@@ -255,19 +255,51 @@ const initBattle = async (battleId, duration, startedAt, io) => {
 
 const finishBattle = async (battleId) => {
   const q = `UPDATE ${TABLES.BATTLE_TABLE} SET finished=1 WHERE id=${battleId};`;
-    try {
-      const con = await asyncConnection();
-      const [rows] = await con.execute(q);
-      if (rows?.affectedRows !== 1) {
-        console.error('There was a problem finishing this battle...');
-        return;
-      }
-      con.end();
-    } catch (error) {
-      console.error('Error trying to start the battle', error);
+  try {
+    const con = await asyncConnection();
+    const [rows] = await con.execute(q);
+    if (rows?.affectedRows !== 1) {
+      console.error('There was a problem finishing this battle...');
+      return;
     }
+    con.end();
+  } catch (error) {
+    console.error('Error trying to start the battle', error);
+  }
+}
+
+const checkRunningBattles = async (io) => {
+  console.log('checking running battles')
+  const q = `
+    SELECT id, started_at, duration
+    FROM ${TABLES.BATTLE_TABLE}
+    WHERE started_at IS NOT NULL AND finished=0;
+  `;
+
+  try {
+    const con = await asyncConnection();
+    const [rows] = await con.execute(q);
+    con.end();
+    if (!rows?.length || rows?.length === 0) {
+      console.error('No started battles...');
+      return;
+    }
+
+    rows.forEach(({ id, started_at, duration }) => {
+      initBattle(id, duration, started_at, io);
+    });
+  } catch (error) {
+    console.error('Error trying to run started battles', error);
+  }
 }
 
 module.exports = {
-  getAll, getById, add, getByBattleId, startBattle, getBattleStatus, addLevels,
+  getAll,
+  getById,
+  add,
+  getByBattleId,
+  startBattle,
+  getBattleStatus,
+  addLevels,
+  checkRunningBattles,
 };

@@ -7,6 +7,7 @@ const logger = require('morgan');
 const dotenv = require('dotenv').config();
 const { wipeDB } = require('./controllers/wipeDB');
 const { ROOMS } = require('./utils/constants');
+const { checkRunningBattles } = require('./controllers/battle');
 
 const indexRouter = require('./routes/index');
 const playerRouter = require('./routes/player');
@@ -75,5 +76,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.send({ error: err });
 });
+
+checkRunningBattles(io);
 
 module.exports = app;

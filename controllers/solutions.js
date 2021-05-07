@@ -100,7 +100,9 @@ const getSolutionsByBattleId = async (battleId) => {
       SELECT MAX(d.created_at)
       FROM ${TABLES.SOLUTIONS_TABLE} AS d
       WHERE d.userId = a.userId AND d.challengeId=a.challengeId
-    );
+      LIMIT 1
+    )
+    ORDER BY b.level_order ASC;
   `;
 
   const con = await asyncConnection();
